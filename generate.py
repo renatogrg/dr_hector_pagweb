@@ -1,5 +1,5 @@
 from pathlib import Path
-import html,json
+import html,json,re
 root=Path(__file__).parent/'dist'
 nav=[('','Inicio'),('doctor','El doctor'),('tratamientos','Tratamientos'),('guia-del-paciente','Guía del paciente'),('contacto','Contacto')]
 services=[('vesicula','01','Vesícula biliar','Evaluación de cálculos biliares y opciones de tratamiento laparoscópico.','Cirugía de vesícula'),('hernias','02','Hernias abdominales','Valoración de hernias inguinales, umbilicales e incisionales.','Cirugía de hernias'),('laparoscopia','03','Cirugía laparoscópica','Conoce el abordaje mínimamente invasivo y cuándo puede ser una opción.','Cirugía laparoscópica')]
@@ -25,5 +25,9 @@ pages['contacto']=('Contacto y consulta en Huancayo · Cirugía Integral',mast('
 for slug,(title,body) in pages.items():
  navigation=''.join(f'<a href="{url(s)}"'+(' aria-current="page"' if s==slug or s=='tratamientos' and slug in data else '')+f'>{label}</a>' for s,label in nav)
  head=f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title}</title><meta name="description" content="{html.escape('Cirugía general y laparoscópica en Huancayo. Conoce al especialista, explora los tratamientos y prepara tu consulta.',quote=True)}"><meta name="robots" content="noindex,nofollow"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2310283d'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='%237cdecf' stroke-width='4'/%3E%3C/svg%3E"><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head><body><a class="skip" href="#main">Ir al contenido</a><header><div class="wrap header-inner"><a class="brand" href="/" aria-label="Cirugía Integral, inicio"><span class="brand-mark">+</span><span>Cirugía Integral<small>DR. HECTOR RODRÍGUEZ AQUIÑO</small></span></a><button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navigation">Menú</button><nav id="navigation" aria-label="Navegación principal">{navigation}</nav><a class="button header-cta" href="/contacto/">Agendar consulta</a></div></header><main id="main">{body}</main><footer><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark">+</span><span>Cirugía Integral<small>CIRUGÍA GENERAL Y LAPAROSCÓPICA</small></span></a><p>Atención informada.<br>Acompañamiento en cada etapa.</p></div><div><h3>Explora</h3><a href="/doctor/">El doctor</a><a href="/tratamientos/">Tratamientos</a><a href="/guia-del-paciente/">Guía del paciente</a></div><div><h3>Tu consulta</h3><p>Huancayo, Perú</p><a href="/contacto/">Contacto y ubicación</a></div></div><div class="wrap footer-bottom"><span>© 2026 Cirugía Integral</span><span>Propuesta de diseño · Datos del consultorio por completar</span></div></footer></body></html>'''
- target=root/slug if slug else root;target.mkdir(parents=True,exist_ok=True);(target/'index.html').write_text(head)
-(root/'robots.txt').write_text('User-agent: *\nDisallow: /\n')
+ # Relative URLs work at localhost, a GitHub repository path, or a custom domain.
+ prefix='../' if slug else './'
+ head=re.sub(r'(href|src)="/(?!/)([^"]*)"',lambda match: f'{match[1]}="{prefix}{match[2]}"',head)
+ target=root/slug if slug else root;target.mkdir(parents=True,exist_ok=True);(target/'index.html').write_text(head,encoding='utf-8')
+(root/'robots.txt').write_text('User-agent: *\nDisallow: /\n',encoding='utf-8')
+(root/'.nojekyll').touch()
