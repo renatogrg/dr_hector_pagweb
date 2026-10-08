@@ -1,9 +1,10 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
-const files = readdirSync(root, { recursive: true }).filter(file => file.endsWith('.html'));
+const files = readdirSync(root, { recursive: true }).filter(file => file.endsWith('index.html'));
 let count = 0;
 const failures = [];
 for (const file of files) {
@@ -19,6 +20,7 @@ for (const file of files) {
     if (!existsSync(target)) failures.push(`${file}: enlace sin destino ${link}`);
   }
 }
-if (files.length !== 8) failures.push(`Se esperaban 8 páginas, se encontraron ${files.length}`);
+if (files.length !== 10) failures.push(`Se esperaban 10 páginas, se encontraron ${files.length}`);
 if (failures.length) { console.error(failures.join('\n')); process.exitCode = 1; }
 else console.log(`${files.length} páginas y ${count} enlaces/recursos locales verificados. Compatibles con rutas de GitHub Pages.`);
+execFileSync('python', [fileURLToPath(new URL('./check-seo.py', import.meta.url))], { stdio: 'inherit' });

@@ -1,2 +1,4 @@
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://renatogrg.github.io/dr_hector_pagweb/sitemap.xml

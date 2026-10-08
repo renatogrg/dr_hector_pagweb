@@ -1,17 +1,30 @@
-const toggle=document.querySelector('.menu-toggle');const nav=document.querySelector('#navigation');toggle?.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('open',open);toggle.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú')});document.addEventListener('keydown',e=>{if(e.key==='Escape'){nav?.classList.remove('open');toggle?.setAttribute('aria-expanded','false')}});let message='';document.querySelector('#appointment-form')?.addEventListener('submit',e=>{e.preventDefault();const form=e.currentTarget;const values=new FormData(form);message=`Hola, soy ${String(values.get('name')).trim()}. Quisiera solicitar una consulta por: ${values.get('reason')}. Mi número de contacto es ${String(values.get('phone')).trim()}. ¿Podrían indicarme la disponibilidad?`;document.querySelector('#request-message').textContent=message;document.querySelector('#form-result').hidden=false;document.querySelector('#form-result').scrollIntoView({behavior:'smooth',block:'nearest'})});document.querySelector('#copy-message')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(message);document.querySelector('#copy-status').textContent='Mensaje copiado.'}catch{document.querySelector('#copy-status').textContent='Selecciona el texto para copiarlo manualmente.'}});
-
-// Progressive enhancement: content remains readable without JavaScript.
-(()=>{
- const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
- if(reduce.matches||!('IntersectionObserver' in window))return;
- const targets=[...document.querySelectorAll('.hero-copy,.hero-visual,.mast,.section-heading,.section > .eyebrow,.section > h2,.service-card,.doctor-text,.principles,.steps article,.faq-grid > div,.cta > div,.cta > a,.profile-photo,.profile-grid > div:last-child,.article > h2,.article > p,.treatment-stages article,.appointment-card,.guide-card,.contact-info,.contact-help,.form-card,.info-band')];
- let observer;
- const showAll=()=>{targets.forEach(el=>el.classList.add('reveal-visible'));observer?.disconnect()};
- try{
-  observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('reveal-visible');observer.unobserve(entry.target)}})},{threshold:0,rootMargin:'0px 0px -35px 0px'});
-  targets.forEach(el=>{const group=el.parentElement;const siblingIndex=[...group.children].indexOf(el);if(group.matches('.service-grid,.steps,.guide-grid'))el.style.setProperty('--reveal-delay',Math.min(siblingIndex*100,200)+'ms');el.classList.add('reveal-ready');observer.observe(el)});
-  const onPreference=event=>{if(event.matches)showAll()};reduce.addEventListener?.('change',onPreference);
-  document.addEventListener('focusin',event=>{targets.filter(el=>el.contains(event.target)).forEach(el=>el.classList.add('reveal-visible'))});
-  window.addEventListener('beforeprint',showAll);
- }catch{showAll()}
-})();
+// Progressive enhancement: content and links exist before this script.
+const mobileMenu=document.querySelector('.mobile-navigation');
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mobileMenu?.open){mobileMenu.open=false;mobileMenu.querySelector('summary').focus()}});
+const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+if(!motion.matches&&'IntersectionObserver' in window){
+ const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('reveal-visible');observer.unobserve(entry.target)}},{threshold:.05});
+ document.querySelectorAll('.service-card,.steps article,.mast,.guide-card,.contact-grid,.profile-grid,.section-heading').forEach(el=>observer.observe(el));
+}
+// Closed event allowlist. No form values, medical topics or queried URLs.
+const accept=document.querySelector('#analytics-accept');
+const decline=document.querySelector('#analytics-decline');
+const status=document.querySelector('#analytics-status');
+let analyticsAllowed=false;
+accept?.addEventListener('click',()=>{
+ if(analyticsAllowed)return;
+ analyticsAllowed=true;
+ const id=accept.dataset.id;
+ window['ga-disable-'+id]=false;
+ window.dataLayer=window.dataLayer||[];
+ window.gtag=function(){window.dataLayer.push(arguments)};
+ window.gtag('consent','default',{analytics_storage:'granted',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'});
+ window.gtag('js',new Date());
+ window.gtag('config',id,{send_page_view:false,allow_google_signals:false,allow_ad_personalization_signals:false,page_location:document.querySelector('link[rel=canonical]').href.split('/').slice(0,3).join('/')+'/',page_referrer:'',page_title:'Sitio médico'});
+ if(!document.querySelector('#ga-script')){const script=document.createElement('script');script.id='ga-script';script.async=true;script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(id);document.head.append(script)}
+ status.textContent='Medición de clics activada durante esta visita.';
+});
+decline?.addEventListener('click',()=>{analyticsAllowed=false;if(accept)window['ga-disable-'+accept.dataset.id]=true;window.gtag?.('consent','update',{analytics_storage:'denied'});status.textContent='Medición desactivada.'});
+function track(name){if(analyticsAllowed&&['call_click','whatsapp_click','appointment_request'].includes(name))window.gtag('event',name,{transport_type:'beacon'})}
+document.querySelectorAll('[data-event]').forEach(link=>link.addEventListener('click',()=>track(link.dataset.event)));
+document.querySelector('#appointment-form')?.addEventListener('submit',event=>{event.preventDefault();const button=event.currentTarget.querySelector('[data-whatsapp]');track('appointment_request');window.location.href='https://wa.me/'+button.dataset.whatsapp+'?text='+encodeURIComponent('Hola. Quisiera consultar disponibilidad para una cita.')});

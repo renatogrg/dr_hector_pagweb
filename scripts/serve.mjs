@@ -5,12 +5,15 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const port = Number(process.env.PORT || 5173);
-const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8' };
+const basePath = (process.env.BASE_PATH || '').replace(/\/$/, '');
+const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
   try {
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405); res.end(); return; }
     const url = new URL(req.url, 'http://localhost');
-    let file = path.resolve(root, '.' + decodeURIComponent(url.pathname));
+    if (basePath && !url.pathname.startsWith(basePath + '/') && url.pathname !== basePath) throw new Error('Outside base path');
+    const pathname = url.pathname.slice(basePath.length) || '/';
+    let file = path.resolve(root, '.' + decodeURIComponent(pathname));
     const relative = path.relative(root, file);
     if (relative.startsWith('..') || path.isAbsolute(relative)) { res.writeHead(403); res.end(); return; }
     if ((await stat(file)).isDirectory()) {
@@ -20,7 +23,11 @@ const server = http.createServer(async (req, res) => {
     const content = await readFile(file);
     res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(req.method === 'HEAD' ? undefined : content);
-  } catch { res.writeHead(404); res.end('No encontrado'); }
+  } catch {
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    const content = await readFile(path.join(root, '404.html')).catch(() => 'No encontrado');
+    res.end(req.method === 'HEAD' ? undefined : content);
+  }
 });
 server.on('error', error => { console.error(error.message); process.exitCode = 1; });
 server.listen(port, '127.0.0.1', () => console.log(`Sitio local: http://localhost:${port}\nCtrl+C para detener. Recarga el navegador tras editar CSS o JS; ejecuta npm run build tras editar generate.py.`));

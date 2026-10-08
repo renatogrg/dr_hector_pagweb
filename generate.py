@@ -1,7 +1,20 @@
 from pathlib import Path
-import html,json,re
-root=Path(__file__).parent/'dist'
+import html,json,re,os
+from urllib.parse import urlsplit
+from xml.etree import ElementTree as ET
+from site_features import settings, doctor, clinic, editorial, adapt, identity_graph, extra_head, nap
+root=Path(os.environ.get('DIST_DIR',Path(__file__).parent/'dist'))
+root.mkdir(parents=True,exist_ok=True)
+config=json.loads((Path(__file__).parent/'site.config.json').read_text(encoding='utf-8'))
+site_url=os.environ.get('SITE_URL',config['url']).rstrip('/')+'/'
+parsed_url=urlsplit(site_url)
+if parsed_url.scheme != 'https' or not parsed_url.netloc or parsed_url.query or parsed_url.fragment or parsed_url.username or parsed_url.password:
+ raise ValueError('SITE_URL debe ser una URL pública HTTPS sin consulta, fragmento ni credenciales.')
+indexable=config['indexable']
+if not isinstance(indexable,bool): raise ValueError('indexable debe ser true o false.')
+robots='index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1' if indexable else 'noindex,follow'
 nav=[('','Inicio'),('doctor','El doctor'),('tratamientos','Tratamientos'),('guia-del-paciente','Guía del paciente'),('contacto','Contacto')]
+nav=[('','Inicio'),('doctor','El doctor'),('tratamientos','Servicios'),('preguntas-frecuentes','Preguntas'),('articulos','Artículos'),('contacto','Contacto')]
 services=[('vesicula','01','Vesícula biliar','Evaluación de cálculos biliares y opciones de tratamiento laparoscópico.','Cirugía de vesícula'),('hernias','02','Hernias abdominales','Valoración de hernias inguinales, umbilicales e incisionales.','Cirugía de hernias'),('laparoscopia','03','Cirugía laparoscópica','Conoce el abordaje mínimamente invasivo y cuándo puede ser una opción.','Cirugía laparoscópica')]
 def url(s): return '/'+s+'/' if s else '/'
 def cards():
@@ -22,12 +35,68 @@ for slug,(tag,title,desc,q1,a1,q2,a2,items) in data.items():
  pages[slug]=(tag.title()+' en Huancayo · Cirugía Integral','<div class="wrap breadcrumb"><a href="/tratamientos/">Tratamientos</a><span>/</span>'+tag.title()+'</div>'+mast(tag,title,desc)+f'''<section class="wrap treatment-grid"><div class="article"><h2>{q1}</h2><p>{a1}</p><h2>{q2}</h2><p>{a2}</p><div class="treatment-stages">'''+''.join(f'<article><span>0{i+1}</span><div><h3>{t}</h3><p>{d}</p></div></article>' for i,(t,d) in enumerate(items))+'''</div><div class="medical-note">Información orientativa. La evaluación médica determina el diagnóstico y el tratamiento. Este contenido debe ser revisado por el especialista antes de su publicación definitiva.</div></div><aside class="appointment-card"><span class="eyebrow">CONSULTA ESPECIALIZADA</span><h3>Resuelve tus dudas<br>sobre tu caso.</h3><p>Prepara tus estudios y preguntas para conversar con el cirujano.</p><a class="button" href="/contacto/">Solicitar consulta</a><hr><small>Cirugía general y laparoscópica<br>Huancayo, Perú</small></aside></section><section class="section wrap"><span class="eyebrow">SIGUE EXPLORANDO</span><h2>Otros tratamientos.</h2><div class="service-grid">'''+cards()+'''</div></section>''')
 pages['guia-del-paciente']=('Guía del paciente · Preparación y consulta',mast('GUÍA DEL PACIENTE','Más información.<br>Más tranquilidad.','Una guía práctica para preparar tu consulta y conversar sobre tu atención.')+'''<section class="wrap guide-grid"><article class="guide-card"><span class="card-no">01 · PRIMERA CONSULTA</span><h2>Qué llevar.</h2><ul><li>Documento de identidad.</li><li>Informes y estudios disponibles.</li><li>Lista de medicamentos y alergias.</li><li>Antecedentes de cirugías o enfermedades.</li><li>Tus preguntas y preocupaciones.</li></ul></article><article class="guide-card dark"><span class="card-no">02 · DECISIONES INFORMADAS</span><h2>Qué preguntar.</h2><ul><li>¿Cuál es mi diagnóstico?</li><li>¿Qué alternativas tengo?</li><li>¿Por qué se recomienda este abordaje?</li><li>¿Qué beneficios y riesgos debo conocer?</li><li>¿Cómo será el seguimiento?</li></ul></article></section><section class="section wrap narrow"><span class="eyebrow">DUDAS HABITUALES</span><h2>Tu atención, paso a paso.</h2>'''+faq([('¿La consulta implica que debo operarme?','No. La evaluación permite conocer tu situación y conversar sobre las opciones, que pueden incluir estudios, seguimiento o tratamiento quirúrgico.'),('¿Cuánto tarda la recuperación?','Depende del procedimiento, del estado de salud y de la evolución. Solicita indicaciones específicas para tu actividad laboral y tus cuidados.'),('¿Debo suspender medicamentos antes de operarme?','No los suspendas por tu cuenta. Informa al equipo qué medicamentos utilizas y sigue sus instrucciones.'),('¿Dónde puedo consultar después de una cirugía?','El equipo debe indicar el canal de contacto y la cita de seguimiento. Antes del alta, confirma a quién llamar y qué señales requieren atención.')])+'''<div class="medical-note">Esta guía no sustituye una evaluación médica. Ante una emergencia, acude a un servicio de urgencias.</div></section>'''+cta())
 pages['contacto']=('Contacto y consulta en Huancayo · Cirugía Integral',mast('CONTACTO','Tu atención comienza<br>con una conversación.','Deja preparada tu solicitud de consulta. El equipo confirmará la disponibilidad cuando se conecten los canales reales.')+'''<section class="wrap contact-grid"><div><div class="contact-info"><span class="eyebrow">CONSULTORIO</span><h2>Huancayo, Perú.</h2><p>Dirección y nombre del consultorio por confirmar.</p><dl><div><dt>WhatsApp / teléfono</dt><dd>Por configurar</dd></div><div><dt>Horario de atención</dt><dd>Por confirmar · previa cita</dd></div><div><dt>Correo para consultas</dt><dd>Por configurar</dd></div></dl></div><div class="contact-help"><h3>¿No sabes qué consulta necesitas?</h3><p>Describe brevemente el motivo. El equipo de atención podrá orientarte sobre cómo reservar.</p></div></div><form id="appointment-form" class="form-card"><h2>Solicitar una consulta</h2><p>Prepara tu mensaje en pocos pasos.</p><label for="name">Nombre completo</label><input id="name" name="name" autocomplete="name" placeholder="Tu nombre" required maxlength="100"><label for="phone">Celular</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="Tu número de contacto" required maxlength="30"><label for="reason">Motivo de consulta</label><select id="reason" name="reason"><option>Evaluación de vesícula</option><option>Evaluación de hernia</option><option>Consulta sobre laparoscopia</option><option>Otra consulta de cirugía general</option></select><button class="button" type="submit">Preparar solicitud</button><p class="form-note">Esta versión de muestra no envía ni guarda datos.</p><div id="form-result" role="status" hidden><h3>Tu mensaje está preparado</h3><p id="request-message"></p><p>Falta conectar el teléfono del consultorio para enviarlo y confirmar una cita.</p><button type="button" class="button outline" id="copy-message">Copiar mensaje</button><span id="copy-status" role="status"></span></div></form></section>''')
+descriptions={
+ '':'Cirugía general y laparoscópica en Huancayo con el Dr. Hector Rodríguez Aquiño. Conoce las áreas de atención y prepara tu consulta.',
+ 'doctor':'Conoce al Dr. Hector Rodríguez Aquiño, cirujano general en Huancayo, y su enfoque de evaluación individual y atención laparoscópica.',
+ 'tratamientos':'Información sobre cirugía de vesícula, hernias abdominales y laparoscopia en Huancayo. Conoce qué se evalúa y las opciones para tu caso.',
+ 'vesicula':'Conoce la evaluación de cálculos biliares y la cirugía de vesícula por laparoscopia en Huancayo: procedimiento, preparación y seguimiento.',
+ 'hernias':'Información sobre hernias inguinales, umbilicales e incisionales en Huancayo: evaluación, opciones de reparación y recuperación.',
+ 'laparoscopia':'Conoce en qué consiste la cirugía laparoscópica, cuándo puede considerarse y qué conversar con el cirujano en Huancayo.',
+ 'guia-del-paciente':'Prepara tu consulta de cirugía general: qué llevar, qué preguntar y cómo conversar sobre preparación, recuperación y seguimiento.',
+ 'contacto':'Información de contacto del Dr. Hector Rodríguez Aquiño en Huancayo y formulario para preparar una solicitud de consulta.'
+}
+pages,descriptions=adapt(pages,descriptions,mast,faq)
+
+def page_metadata(slug,title):
+ canonical=site_url+(slug+'/' if slug else '')
+ graph=[{'@type':'WebSite','@id':site_url+'#website','url':site_url,'name':'Cirugía Integral · Dr. Hector Rodríguez Aquiño','inLanguage':'es-PE'},
+ {'@type':'WebPage','@id':canonical+'#webpage','url':canonical,'name':title,'description':descriptions[slug],'inLanguage':'es-PE','isPartOf':{'@id':site_url+'#website'}}]
+ if slug:
+  crumbs=[{'@type':'ListItem','position':1,'name':'Inicio','item':site_url}]
+  if slug in data: crumbs.append({'@type':'ListItem','position':2,'name':'Tratamientos','item':site_url+'tratamientos/'})
+  crumbs.append({'@type':'ListItem','position':len(crumbs)+1,'name':title.split(' · ')[0],'item':canonical})
+  graph.append({'@type':'BreadcrumbList','@id':canonical+'#breadcrumbs','itemListElement':crumbs})
+  graph[1]['breadcrumb']={'@id':canonical+'#breadcrumbs'}
+ graph.extend(identity_graph(site_url))
+ graph[1]['about']={'@id':site_url+'#doctor'}
+ if slug in data and editorial['reviewer']:
+  graph.append({'@type':'Article','@id':canonical+'#article','headline':title,'mainEntityOfPage':{'@id':canonical+'#webpage'},'datePublished':editorial['published'],'dateModified':editorial['reviewed'],'author':{'@type':'Organization','name':editorial['author']},'url':canonical})
+  graph[1]['reviewedBy']={'@type':'Person','name':editorial['reviewer']}
+  graph[1]['lastReviewed']=editorial['reviewed']
+ structured=json.dumps({'@context':'https://schema.org','@graph':graph},ensure_ascii=False).replace('<','\\u003c')
+ return f'<link rel="canonical" href="{html.escape(canonical,quote=True)}"><script type="application/ld+json">{structured}</script>'
 for slug,(title,body) in pages.items():
  navigation=''.join(f'<a href="{url(s)}"'+(' aria-current="page"' if s==slug or s=='tratamientos' and slug in data else '')+f'>{label}</a>' for s,label in nav)
- head=f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title}</title><meta name="description" content="{html.escape('Cirugía general y laparoscópica en Huancayo. Conoce al especialista, explora los tratamientos y prepara tu consulta.',quote=True)}"><meta name="robots" content="noindex,nofollow"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2310283d'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='%237cdecf' stroke-width='4'/%3E%3C/svg%3E"><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head><body><a class="skip" href="#main">Ir al contenido</a><header><div class="wrap header-inner"><a class="brand" href="/" aria-label="Cirugía Integral, inicio"><span class="brand-mark">+</span><span>Cirugía Integral<small>DR. HECTOR RODRÍGUEZ AQUIÑO</small></span></a><button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navigation">Menú</button><nav id="navigation" aria-label="Navegación principal">{navigation}</nav><a class="button header-cta" href="/contacto/">Agendar consulta</a></div></header><main id="main">{body}</main><footer><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark">+</span><span>Cirugía Integral<small>CIRUGÍA GENERAL Y LAPAROSCÓPICA</small></span></a><p>Atención informada.<br>Acompañamiento en cada etapa.</p></div><div><h3>Explora</h3><a href="/doctor/">El doctor</a><a href="/tratamientos/">Tratamientos</a><a href="/guia-del-paciente/">Guía del paciente</a></div><div><h3>Tu consulta</h3><p>Huancayo, Perú</p><a href="/contacto/">Contacto y ubicación</a></div></div><div class="wrap footer-bottom"><span>© 2026 Cirugía Integral</span><span>Propuesta de diseño · Datos del consultorio por completar</span></div></footer></body></html>'''
+ head=f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{title}</title><meta name="description" content="{html.escape(descriptions[slug],quote=True)}"><meta name="robots" content="{robots}">{page_metadata(slug,title)}<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2310283d'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='%237cdecf' stroke-width='4'/%3E%3C/svg%3E"><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head><body><a class="skip" href="#main">Ir al contenido</a><header><div class="wrap header-inner"><a class="brand" href="/" aria-label="Cirugía Integral, inicio"><span class="brand-mark">+</span><span>Cirugía Integral<small>DR. HECTOR RODRÍGUEZ AQUIÑO</small></span></a><button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navigation">Menú</button><nav id="navigation" aria-label="Navegación principal">{navigation}</nav><a class="button header-cta" href="/contacto/">Agendar consulta</a></div></header><main id="main">{body}</main><footer><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark">+</span><span>Cirugía Integral<small>CIRUGÍA GENERAL Y LAPAROSCÓPICA</small></span></a><p>Atención informada.<br>Acompañamiento en cada etapa.</p></div><div><h3>Explora</h3><a href="/doctor/">El doctor</a><a href="/tratamientos/">Tratamientos</a><a href="/guia-del-paciente/">Guía del paciente</a></div><div><h3>Tu consulta</h3><p>Huancayo, Perú</p><a href="/contacto/">Contacto y ubicación</a></div></div><div class="wrap footer-bottom"><span>© 2026 Cirugía Integral</span><span>Propuesta de diseño · Datos del consultorio por completar</span></div></footer></body></html>'''
+ head=head.replace('</head>',extra_head(site_url,slug,title,descriptions[slug])+'</head>')
+ head=re.sub(r'<button class="menu-toggle".*?</button>', '',head)
+ head=head.replace('<nav id="navigation"', '<nav class="desktop-navigation" id="navigation"')
+ head=head.replace('</nav><a class="button header-cta"', '</nav><details class="mobile-navigation"><summary>Menú</summary><nav aria-label="Navegación móvil">'+navigation+'</nav></details><a class="button header-cta"')
+ head=head.replace('HECTOR','HÉCTOR').replace('Hector','Héctor').replace('Huancayo, Perú','Ubicación pendiente de confirmar')
+ if clinic['city']: head=head.replace('Ubicación pendiente de confirmar',html.escape(clinic['city']))
+ head=head.replace('Propuesta de diseño · Datos del consultorio por completar','Datos profesionales y del consultorio sujetos a verificación')
+ head=head.replace('</footer>', '<div class="wrap">'+nap()+'</div></footer>')
+ if settings['analyticsId']:
+  head=head.replace('</body>',f'<aside class="wrap analytics-consent" aria-label="Preferencias de medición"><p>Con tu permiso medimos clics de contacto, sin enviar nombres, teléfonos ni información médica.</p><button type="button" id="analytics-accept" data-id="{html.escape(settings["analyticsId"],quote=True)}">Aceptar medición</button> <button type="button" id="analytics-decline">Rechazar o retirar permiso</button><p id="analytics-status" role="status"></p></aside></body>')
  # Relative URLs work at localhost, a GitHub repository path, or a custom domain.
  prefix='../' if slug else './'
  head=re.sub(r'(href|src)="/(?!/)([^"]*)"',lambda match: f'{match[1]}="{prefix}{match[2]}"',head)
+ head=re.sub(r'srcset="([^"]+)"',lambda match:'srcset="'+re.sub(r'/(assets/)',prefix+r'\1',match[1])+'"',head)
  target=root/slug if slug else root;target.mkdir(parents=True,exist_ok=True);(target/'index.html').write_text(head,encoding='utf-8')
-(root/'robots.txt').write_text('User-agent: *\nDisallow: /\n',encoding='utf-8')
+# The wildcard group also permits search crawlers such as Googlebot, Bingbot
+# and OAI-SearchBot. Search access and AI training are separate policies.
+robots_text='User-agent: *\n'+('Allow: /\n' if indexable else 'Disallow: /\n')
+if indexable: robots_text+='\nSitemap: '+site_url+'sitemap.xml\n'
+if indexable and not settings['allowAITraining']:
+ robots_text+='\n# Training controls; search bots remain allowed.\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: Google-Extended\nDisallow: /\n'
+(root/'robots.txt').write_text(robots_text,encoding='utf-8')
+ET.register_namespace('', 'http://www.sitemaps.org/schemas/sitemap/0.9')
+sitemap=ET.Element('{http://www.sitemaps.org/schemas/sitemap/0.9}urlset')
+if indexable:
+ for slug in pages:
+  entry=ET.SubElement(sitemap,'{http://www.sitemaps.org/schemas/sitemap/0.9}url')
+  ET.SubElement(entry,'{http://www.sitemaps.org/schemas/sitemap/0.9}loc').text=site_url+(slug+'/' if slug else '')
+ET.ElementTree(sitemap).write(root/'sitemap.xml',encoding='utf-8',xml_declaration=True)
+# GitHub Pages serves this document with HTTP 404 for nonexistent paths.
+(root/'404.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Página no encontrada · Cirugía Integral</title><meta name="robots" content="noindex,follow"></head><body><main><h1>Página no encontrada</h1><p>La dirección solicitada no existe.</p><a href="'+html.escape(site_url,quote=True)+'">Volver al inicio</a></main></body></html>',encoding='utf-8')
 (root/'.nojekyll').touch()

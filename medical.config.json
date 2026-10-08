@@ -1,0 +1,32 @@
+{
+  "doctor": {
+    "name": "Dr. Héctor Rodríguez Aquiño",
+    "specialty": "Cirugía general y laparoscopia",
+    "cmp": null,
+    "rne": null,
+    "training": [],
+    "experience": null
+  },
+  "clinic": {
+    "name": null,
+    "streetAddress": null,
+    "city": null,
+    "region": null,
+    "postalCode": null,
+    "country": null,
+    "phone": null,
+    "whatsapp": null,
+    "mapsUrl": null,
+    "hours": []
+  },
+  "confirmedServices": ["laparoscopia"],
+  "editorial": {
+    "author": "Redacción del sitio (asistida por IA)",
+    "published": "2026-10-08",
+    "reviewer": null,
+    "reviewed": null
+  },
+  "searchConsoleVerification": null,
+  "analyticsId": null,
+  "allowAITraining": true
+}
