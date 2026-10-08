@@ -4,7 +4,9 @@ Proyecto original recuperado de Sites y adaptado para ejecutarse en Windows y pu
 
 Repositorio: https://github.com/renatogrg/dr_hector_pagweb
 
-El repositorio se creó privado. GitHub Pages está preparado, pero todavía no activado. Para usar Pages con GitHub Free será necesario autorizar que el repositorio sea público; los planes compatibles también permiten Pages desde repositorios privados.
+El repositorio es público y GitHub Pages está activado mediante GitHub Actions. Los cambios enviados a `main` generan, verifican y publican el sitio automáticamente.
+
+Sitio: https://renatogrg.github.io/dr_hector_pagweb/
 
 Para subir cambios a este repositorio desde esta PC:
 
