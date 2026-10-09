@@ -14,10 +14,3 @@
 /* Native mobile disclosure works before scripts and prevents layout shifts. */
 .mobile-navigation{display:none}.desktop-navigation{display:flex}
 @media(max-width:760px){.desktop-navigation{display:none}.mobile-navigation{display:block;margin-left:auto}.mobile-navigation summary{cursor:pointer;list-style:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px}.mobile-navigation summary::-webkit-details-marker{display:none}.mobile-navigation nav{position:absolute;top:79px;left:0;right:0;display:flex;flex-direction:column;padding:20px;background:white;box-shadow:0 15px 20px #10283d0a}.mobile-navigation:not([open]) nav{display:none}}
-/* Keep the complete portrait and its caption inside the mobile hero. */
-@media(max-width:760px){
- .hero-visual{height:auto;display:grid;overflow:visible}
- .hero-visual img{grid-area:1/1;width:100%;height:auto;object-fit:contain}
- .hero-visual .portrait-label{grid-area:1/1;position:relative;inset:auto;align-self:end;justify-self:start;margin:24px 20px max(24px,env(safe-area-inset-bottom));width:fit-content;max-width:calc(100% - 40px);overflow-wrap:anywhere}
- .mobile-navigation nav{top:100%}
-}
