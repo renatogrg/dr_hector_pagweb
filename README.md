@@ -4,7 +4,7 @@ Web estática de cirugía general y laparoscopia, preparada para GitHub Pages. T
 
 ## Trabajar y validar
 
-Se requiere Python 3.12+ y Node.js 22+. No se necesitan paquetes para generar ni para las comprobaciones de código/HTTP.
+Se requiere Python 3.12+ y Node.js 22+. Instala Prettier con `npm.cmd ci` al preparar el proyecto; se usa para dar formato al HTML generado.
 
 ```powershell
 npm.cmd run build
@@ -15,6 +15,8 @@ npm.cmd run dev
 Abre http://localhost:5173. Las rutas públicas son `/`, `/doctor/`, `/tratamientos/`, `/laparoscopia/`, `/vesicula/`, `/hernias/`, `/guia-del-paciente/`, `/preguntas-frecuentes/`, `/articulos/` y `/contacto/`.
 
 `generate.py` conserva el diseño original y genera HTML, sitemap, robots y 404. `site_features.py` adapta contenido, identidad y las integraciones. Los estilos y el JavaScript fuente se encuentran en `dist/style.css` y `dist/app.js`; no edites los HTML generados. Las imágenes WebP responsive están en `dist/assets/`; el retrato original se conserva sin usarse como descarga principal.
+
+`npm run build` también formatea todos los HTML con indentación de dos espacios. Para formatearlos sin regenerar contenido, ejecuta `npm run format:html`; para comprobar el formato, `npm run format:check`. La configuración está en `.prettierrc.json`.
 
 `npm run check` verifica recursos, enlaces, codificación, títulos/descripciones únicos, idioma, viewport, imágenes, Open Graph, canónicas, JSON-LD, sitemap, robots, páginas huérfanas y error 404. Además arranca servidores locales para probar GET, HEAD y recarga en la raíz y en el subdirectorio de Pages. Las pruebas de configuración generan datos de prueba en un directorio temporal fuera del sitio publicado y los eliminan al finalizar.
 
