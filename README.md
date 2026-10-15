@@ -16,6 +16,14 @@ Abre http://localhost:5173. Las rutas públicas son `/`, `/doctor/`, `/tratamien
 
 `generate.py` conserva el diseño original y genera HTML, sitemap, robots y 404. `site_features.py` adapta contenido, identidad y las integraciones. Los estilos y el JavaScript fuente se encuentran en `dist/style.css` y `dist/app.js`; no edites los HTML generados. Las imágenes WebP responsive están en `dist/assets/`; el retrato original se conserva sin usarse como descarga principal.
 
+### Editar los archivos Python
+
+Los archivos usan indentación de cuatro espacios. `generate.py` está dividido en secciones comentadas: configuración, navegación, componentes, páginas, metadatos y archivos auxiliares. Busca `pages[""]` para editar el contenido base del inicio. La especialidad y las ciudades se encuentran en `hero_intro`, dentro de `site_features.py`; ese archivo también adapta los servicios y el contacto.
+
+Los bloques HTML están repartidos en cadenas entre comillas, una tras otra. Python las une automáticamente: puedes editar el texto entre las comillas sin añadir `+` entre líneas. Conserva las comillas, los paréntesis y las expresiones entre llaves de las cadenas que empiezan por `f`. Tras editar, ejecuta `npm run build` y `npm run check`.
+
+Para mantener el formato de Python, instala opcionalmente `python -m pip install -r requirements-dev.txt` y ejecuta `python -m black generate.py site_features.py scripts/check-config.py scripts/check-seo.py`. La configuración está en `pyproject.toml`; Black no forma parte del proceso de publicación.
+
 `npm run check` verifica recursos, enlaces, codificación, títulos/descripciones únicos, idioma, viewport, imágenes, Open Graph, canónicas, JSON-LD, sitemap, robots, páginas huérfanas y error 404. Además arranca servidores locales para probar GET, HEAD y recarga en la raíz y en el subdirectorio de Pages. Las pruebas de configuración generan datos de prueba en un directorio temporal fuera del sitio publicado y los eliminan al finalizar.
 
 Para repetir la prueba visual, instala Playwright en tu entorno de pruebas y Chrome. Ejecuta `npm run check:browser`; si Playwright está en un entorno compartido, indica su carpeta en `BROWSER_NODE_MODULES`. Guarda capturas y resultados en `validation/`, excluido de Git y del despliegue. Esta prueba usa interceptación local de archivos; la prueba HTTP real es independiente. No usa servicios de analítica externos.

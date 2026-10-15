@@ -1,0 +1,2 @@
+# Herramienta opcional de formato; no se necesita para generar el sitio.
+black==26.10.1
