@@ -6,16 +6,9 @@
   "scripts": {
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
-    "build": "python generate.py && npm run format:html",
-    "format:html": "prettier --write \"dist/**/*.html\"",
-    "format:check": "prettier --check \"dist/**/*.html\"",
+    "build": "python generate.py",
     "check": "node scripts/check.mjs && node scripts/check-http.mjs && python scripts/check-config.py",
     "check:browser": "node scripts/check-browser.mjs"
   },
-  "engines": {
-    "node": ">=22"
-  },
-  "devDependencies": {
-    "prettier": "3.9.10"
-  }
+  "engines": { "node": ">=22" }
 }
