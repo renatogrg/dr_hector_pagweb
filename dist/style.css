@@ -30,9 +30,6 @@
   font-size: 0.875rem;
   line-height: 1.6;
 }
-.hero-locations-label {
-  color: #c6d5df;
-}
 .hero-locations ul {
   display: flex;
   flex-wrap: wrap;
