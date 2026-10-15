@@ -193,7 +193,7 @@ def editorial_block(sources):
     revision = (
         f'Revisión médica: {e(editorial["reviewer"])} · <time datetime="{editorial["reviewed"]}">{editorial["reviewed"]}</time>.'
         if editorial["reviewer"]
-        else "Revisión médica pendiente. Borrador educativo: no atribuido al doctor ni aprobado por él."
+        else "Revisión médica pendiente."
     )
     return (
         (
