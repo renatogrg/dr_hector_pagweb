@@ -12,5 +12,41 @@
 @media(prefers-reduced-motion:reduce){.reveal-visible{animation:none!important}}
 @media print{header{position:static}nav,.menu-toggle,.analytics-consent{display:none}a{text-decoration:underline}.reveal-ready{opacity:1!important;transform:none!important}}
 /* Native mobile disclosure works before scripts and prevents layout shifts. */
+.hero-intro {
+  margin-bottom: 28px;
+}
+.hero-intro .hero-specialty {
+  display: block;
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
+}
+.hero-locations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.hero-locations-label {
+  color: #c6d5df;
+}
+.hero-locations ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: #fff;
+  font-weight: 500;
+}
+.hero-locations li + li::before {
+  content: "·";
+  margin-right: 12px;
+  color: #9ee5dc;
+}
 .mobile-navigation{display:none}.desktop-navigation{display:flex}
 @media(max-width:760px){.desktop-navigation{display:none}.mobile-navigation{display:block;margin-left:auto}.mobile-navigation summary{cursor:pointer;list-style:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px}.mobile-navigation summary::-webkit-details-marker{display:none}.mobile-navigation nav{position:absolute;top:79px;left:0;right:0;display:flex;flex-direction:column;padding:20px;background:white;box-shadow:0 15px 20px #10283d0a}.mobile-navigation:not([open]) nav{display:none}}
