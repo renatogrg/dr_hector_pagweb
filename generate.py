@@ -757,7 +757,7 @@ for slug, (title, body) in pages.items():
         f"""<div>"""
         f"""<h3>Explora</h3>"""
         f"""<a href="/doctor/">El doctor</a>"""
-        f"""<a href="/tratamientos/">Tratamientos</a>"""
+        f"""<a href="/tratamientos/">Servicios</a>"""
         f"""<a href="/guia-del-paciente/">Guía del paciente</a>"""
         f"""</div>"""
         f"""<div>"""
@@ -796,6 +796,8 @@ for slug, (title, body) in pages.items():
         head = head.replace(
             "Ubicación pendiente de confirmar", html.escape(clinic["city"])
         )
+    else:
+        head = head.replace("<p>Ubicación pendiente de confirmar</p>", "")
     head = head.replace(
         "Propuesta de diseño · Datos del consultorio por completar",
         "Datos profesionales y del consultorio sujetos a verificación",

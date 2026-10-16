@@ -304,20 +304,45 @@ def adapt(pages, descriptions, mast, faq):
         "Servicios de cirugía general y laparoscopia",
         mast(
             "SERVICIOS",
-            "Cirugía general y laparoscopia.",
-            "La evaluación individual permite conversar sobre alternativas, riesgos y recuperación.",
+            "Atención quirúrgica con información clara.",
+            "Conoce la especialidad del doctor y consulta las guías educativas antes de conversar sobre tu caso.",
         )
         + (
-            '<section class="wrap section">'
-            "<h2>Especialidad y abordaje</h2>"
-            "<p>La especialidad indicada es cirugía general y laparoscopia. La indicación de un procedimiento depende de la evaluación médica.</p>"
-            '<a class="button" href="/laparoscopia/">Conocer la laparoscopia</a>'
-            "<h2>Información sobre procedimientos</h2>"
-            "<p>Las guías de vesícula y hernias son material educativo. La disponibilidad de estos procedimientos con el doctor está pendiente de confirmación.</p>"
-            '<div class="actions">'
-            '<a class="text-link" href="/vesicula/">Guía sobre vesícula</a>'
-            '<a class="text-link" href="/hernias/">Guía sobre hernias</a>'
+            '<section class="wrap services-overview">'
+            '<div class="services-heading">'
+            '<span class="eyebrow">ÁREAS DE ATENCIÓN</span>'
+            "<h2>Información para decidir con claridad.</h2>"
+            "<p>La cirugía general y laparoscópica requiere una evaluación individual. Estas opciones te ayudan a conocer el enfoque del doctor y a preparar tus preguntas para la consulta.</p>"
             "</div>"
+            '<div class="services-grid">'
+            '<article class="service-option service-option--featured">'
+            '<span class="service-status">Servicio confirmado</span>'
+            "<h2>Cirugía laparoscópica</h2>"
+            "<p>Conoce este abordaje quirúrgico, sus posibles beneficios y los aspectos que se evalúan antes de indicar un procedimiento.</p>"
+            '<a class="text-link" href="/laparoscopia/">Conocer la laparoscopia</a>'
+            "</article>"
+            '<article class="service-option">'
+            '<span class="service-status">Guía educativa</span>'
+            "<h2>Vesícula biliar</h2>"
+            "<p>Información general sobre cálculos biliares, señales de alerta y preguntas útiles para una evaluación médica.</p>"
+            '<a class="text-link" href="/vesicula/">Leer guía sobre vesícula</a>'
+            "</article>"
+            '<article class="service-option">'
+            '<span class="service-status">Guía educativa</span>'
+            "<h2>Hernias abdominales</h2>"
+            "<p>Una explicación sencilla sobre los tipos de hernia, la evaluación y las situaciones que requieren atención pronta.</p>"
+            '<a class="text-link" href="/hernias/">Leer guía sobre hernias</a>'
+            "</article>"
+            "</div>"
+            '<p class="services-note">Las guías son material educativo y no confirman la disponibilidad de un procedimiento. La evaluación médica determina las opciones adecuadas para cada caso.</p>'
+            "</section>"
+            '<section class="wrap services-cta">'
+            "<div>"
+            '<span class="eyebrow">CONSULTA ESPECIALIZADA</span>'
+            "<h2>¿Necesitas una evaluación quirúrgica?</h2>"
+            "<p>Conversa sobre tus síntomas, estudios previos y las alternativas que podrían corresponder a tu caso.</p>"
+            "</div>"
+            '<a class="button light" href="/contacto/">Solicitar una consulta</a>'
             "</section>"
         ),
     )
