@@ -20,7 +20,7 @@ async function routeFiles(context){
 let browser;
 try{
  browser=await chromium.launch({headless:true,channel:process.env.BROWSER_CHANNEL||'chrome'});
- const routes=['','doctor/','tratamientos/','vesicula/','hernias/','laparoscopia/','guia-del-paciente/','preguntas-frecuentes/','articulos/','contacto/'];
+ const routes=['','doctor/','servicios/','vesicula/','hernias/','laparoscopia/','guia-del-paciente/','preguntas-frecuentes/','contacto/'];
  const results=[];
  for(const javaScriptEnabled of [true,false])for(const viewport of [{width:390,height:844},{width:1440,height:1000}]){
   const context=await browser.newContext({javaScriptEnabled,viewport,reducedMotion:'reduce'});

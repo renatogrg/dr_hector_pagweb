@@ -28,3 +28,27 @@ decline?.addEventListener('click',()=>{analyticsAllowed=false;if(accept)window['
 function track(name){if(analyticsAllowed&&['call_click','whatsapp_click','appointment_request'].includes(name))window.gtag('event',name,{transport_type:'beacon'})}
 document.querySelectorAll('[data-event]').forEach(link=>link.addEventListener('click',()=>track(link.dataset.event)));
 document.querySelector('#appointment-form')?.addEventListener('submit',event=>{event.preventDefault();const button=event.currentTarget.querySelector('[data-whatsapp]');track('appointment_request');window.location.href='https://wa.me/'+button.dataset.whatsapp+'?text='+encodeURIComponent('Hola. Quisiera consultar disponibilidad para una cita.')});
+
+document.querySelectorAll('[data-services-carousel]').forEach(carousel=>{
+ const track=carousel.querySelector('.services-grid');
+ const previous=carousel.querySelector('[data-carousel-prev]');
+ const next=carousel.querySelector('[data-carousel-next]');
+ const controls=carousel.querySelector('.services-carousel-controls');
+ if(!track||!previous||!next||!controls)return;
+ const update=()=>{
+  const overflow=track.scrollWidth>track.clientWidth+2;
+  controls.hidden=!overflow;
+  previous.disabled=track.scrollLeft<=2;
+  next.disabled=track.scrollLeft+track.clientWidth>=track.scrollWidth-2;
+ };
+ const move=direction=>{
+  const card=track.querySelector('.service-option, .service-card');
+  const gap=parseFloat(getComputedStyle(track).columnGap)||0;
+  track.scrollBy({left:direction*((card?.getBoundingClientRect().width||track.clientWidth)+gap),behavior:motion.matches?'auto':'smooth'});
+ };
+ previous.addEventListener('click',()=>move(-1));
+ next.addEventListener('click',()=>move(1));
+ track.addEventListener('scroll',update,{passive:true});
+ window.addEventListener('resize',update);
+ update();
+});

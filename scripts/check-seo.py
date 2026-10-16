@@ -68,6 +68,12 @@ pages = {}
 titles, descriptions = set(), set()
 for file in root.rglob("index.html"):
     slug = file.parent.relative_to(root).as_posix()
+    if slug == "tratamientos":
+        legacy = file.read_text(encoding="utf-8")
+        assert 'content="0;url=../servicios/"' in legacy
+        assert 'content="noindex,follow"' in legacy
+        assert f'href="{base}servicios/"' in legacy
+        continue
     canonical = base + (slug + "/" if slug != "." else "")
     page = Page(file.read_text(encoding="utf-8"))
     assert page.canonicals == [canonical], f"{file}: canonical incorrecta"

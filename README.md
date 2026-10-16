@@ -12,7 +12,7 @@ npm.cmd run check
 npm.cmd run dev
 ```
 
-Abre http://localhost:5173. Las rutas públicas son `/`, `/doctor/`, `/tratamientos/`, `/laparoscopia/`, `/vesicula/`, `/hernias/`, `/guia-del-paciente/`, `/preguntas-frecuentes/`, `/articulos/` y `/contacto/`.
+Abre http://localhost:5173. Las rutas públicas son `/`, `/doctor/`, `/servicios/`, `/laparoscopia/`, `/vesicula/`, `/hernias/`, `/guia-del-paciente/`, `/preguntas-frecuentes/` y `/contacto/`.
 
 `generate.py` conserva el diseño original y genera HTML, sitemap, robots y 404. `site_features.py` adapta contenido, identidad y las integraciones. Los estilos y el JavaScript fuente se encuentran en `dist/style.css` y `dist/app.js`; no edites los HTML generados. Las imágenes WebP responsive están en `dist/assets/`; el retrato original se conserva sin usarse como descarga principal.
 

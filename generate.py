@@ -1,8 +1,8 @@
 """Genera el sitio estático. Los bloques HTML se unen sin añadir espacios."""
 
 from pathlib import Path
-import html, json, re, os
-from urllib.parse import urlsplit
+import html, json, re, os, shutil
+from urllib.parse import quote, urlsplit
 from xml.etree import ElementTree as ET
 from site_features import (
     settings,
@@ -18,6 +18,11 @@ from site_features import (
 # 1. Configuración de salida, dominio e indexación.
 root = Path(os.environ.get("DIST_DIR", Path(__file__).parent / "dist"))
 root.mkdir(parents=True, exist_ok=True)
+# Elimina rutas retiradas para que una compilación nueva no conserve páginas antiguas.
+for retired_route in ("articulos",):
+    retired_path = root / retired_route
+    if retired_path.exists():
+        shutil.rmtree(retired_path)
 config = json.loads(
     (Path(__file__).parent / "site.config.json").read_text(encoding="utf-8")
 )
@@ -46,39 +51,39 @@ robots = (
 nav = [
     ("", "Inicio"),
     ("doctor", "El doctor"),
-    ("tratamientos", "Tratamientos"),
+    ("servicios", "Servicios"),
     ("guia-del-paciente", "Guía del paciente"),
     ("contacto", "Contacto"),
 ]
 nav = [
     ("", "Inicio"),
     ("doctor", "El doctor"),
-    ("tratamientos", "Servicios"),
+    ("servicios", "Servicios"),
+    ("guia-del-paciente", "Guía del paciente"),
     ("preguntas-frecuentes", "Preguntas"),
-    ("articulos", "Artículos"),
     ("contacto", "Contacto"),
 ]
 services = [
     (
-        "vesicula",
+        "laparoscopia",
         "01",
-        "Vesícula biliar",
-        "Evaluación de cálculos biliares y opciones de tratamiento laparoscópico.",
-        "Cirugía de vesícula",
+        "Cirugía laparoscópica",
+        "Comprende este abordaje de mínima invasión y cuándo podría ser una opción.",
+        "Cirugía laparoscópica",
+    ),
+    (
+        "vesicula",
+        "02",
+        "Colecistectomía",
+        "Extracción de la vesícula por laparoscopia o cirugía abierta, según la evaluación médica.",
+        "Colecistectomía",
     ),
     (
         "hernias",
-        "02",
-        "Hernias abdominales",
-        "Valoración de hernias inguinales, umbilicales e incisionales.",
-        "Cirugía de hernias",
-    ),
-    (
-        "laparoscopia",
         "03",
-        "Cirugía laparoscópica",
-        "Conoce el abordaje mínimamente invasivo y cuándo puede ser una opción.",
-        "Cirugía laparoscópica",
+        "Reparación de hernias abdominales",
+        "Reparación por laparoscopia o cirugía abierta, con el abordaje indicado para cada caso.",
+        "Reparación de hernias abdominales",
     ),
 ]
 
@@ -88,18 +93,36 @@ def url(s):
     return "/" + s + "/" if s else "/"
 
 
-def cards():
-    return "".join(
+def cards(current_slug=None, include_pending=False):
+    rendered = "".join(
         (
-            f'<a class="service-card" href="{url(s)}">'
+            f'<a class="service-card{" service-card--current" if s == current_slug else ""}" href="{url(s)}"'
+            + (' aria-current="page"' if s == current_slug else "")
+            + ">"
             f'<span class="card-no">{n}</span>'
             f"<h3>{title}</h3>"
             f"<p>{desc}</p>"
-            f'<span class="text-link">Conocer el tratamiento</span>'
+            f'<span class="text-link">Ver información completa</span>'
             f"</a>"
         )
         for s, n, title, desc, t in services
     )
+    if include_pending:
+        rendered += (
+            '<article class="service-card service-card--placeholder">'
+            '<span class="card-no">04 · PENDIENTE DE CONFIRMAR</span>'
+            '<h3>Servicio adicional 04</h3>'
+            '<p>El nombre y los detalles se incorporarán al confirmar la información del doctor.</p>'
+            '<span class="text-link service-link-disabled">Próximamente</span>'
+            '</article>'
+            '<article class="service-card service-card--placeholder">'
+            '<span class="card-no">05 · PENDIENTE DE CONFIRMAR</span>'
+            '<h3>Servicio adicional 05</h3>'
+            '<p>El nombre y los detalles se incorporarán al confirmar la información del doctor.</p>'
+            '<span class="text-link service-link-disabled">Próximamente</span>'
+            '</article>'
+        )
+    return rendered
 
 
 def faq(items):
@@ -115,14 +138,15 @@ def faq(items):
 
 def cta():
     return (
-        '<section class="cta wrap">'
-        "<div>"
+        '<section class="wrap consultation-banner">'
+        '<div class="consultation-banner-inner">'
+        '<div class="consultation-banner-copy">'
         '<span class="eyebrow">EL SIGUIENTE PASO</span>'
         "<h2>Hablemos de tu salud.</h2>"
         "<p>Una consulta para entender tu caso y resolver tus dudas.</p>"
         "</div>"
-        '<a class="button light" href="/contacto/">Solicitar una consulta</a>'
-        "</section>"
+        '<a class="button light consultation-banner-link" href="/contacto/">Solicitar una consulta <span aria-hidden="true">↗</span></a>'
+        "</div></section>"
     )
 
 
@@ -212,10 +236,9 @@ pages[""] = (
         '<section class="section wrap">'
         '<div class="section-heading">'
         "<div>"
-        '<span class="eyebrow">TRATAMIENTOS</span>'
+        '<span class="eyebrow">SERVICIOS</span>'
         "<h2>Comprende tus opciones.</h2>"
         "</div>"
-        "<p>Información práctica para dar<br>el primer paso con confianza.</p>"
         "</div>"
         '<div class="service-grid">'
     )
@@ -263,7 +286,7 @@ pages[""] = (
     + steps()
     + (
         "</section>"
-        '<section class="faq-section">'
+        '<section class="faq-section home-faq-section">'
         '<div class="wrap faq-grid">'
         "<div>"
         '<span class="eyebrow">PREGUNTAS FRECUENTES</span>'
@@ -287,26 +310,24 @@ pages[""] = (
             ),
         ]
     )
-    + """</div></section>"""
-    + cta(),
+    + "</div>"
+    + cta()
+    + "</section>",
 )
 # Perfil del doctor.
 pages["doctor"] = (
     "Conoce al doctor · Cirugía Integral",
-    mast(
-        "EL DOCTOR",
-        "La persona detrás<br>de tu atención.",
-        "Una relación de confianza se construye escuchando y explicando.",
-    )
-    + (
-        '<section class="wrap profile-grid">'
+    (
+        '<section class="wrap doctor-profile-hero">'
+        '<span class="eyebrow doctor-section-label">EL DOCTOR</span>'
         '<div class="profile-photo">'
-        '<img src="/assets/hector-rodriguez.png" alt="Dr. Hector Rodríguez Aquiño" width="800" height="1000">'
+        '<img src="/assets/hector-rodriguez.png" alt="Dr. Hector Rodríguez Aquiño" width="1082" height="1454">'
         "</div>"
-        "<div>"
-        '<span class="eyebrow">CIRUJANO GENERAL</span>'
-        "<h2>Dr. Hector Rodríguez Aquiño</h2>"
+        '<div class="doctor-profile-copy">'
+        '<span class="doctor-profile-tagline">La persona detrás de tu atención.</span>'
+        "<h1>Dr. Hector Rodríguez Aquiño</h1>"
         '<p class="lead">Cirugía general y laparoscópica en Huancayo.</p>'
+        '<p class="doctor-trust">Una relación de confianza se construye escuchando y explicando.</p>'
         "<p>Mi enfoque comienza con comprender tu motivo de consulta y revisar las opciones disponibles. La recomendación de una cirugía se conversa después de una evaluación individual.</p>"
         '<div class="credential-box">'
         "<h3>Credenciales profesionales</h3>"
@@ -336,11 +357,11 @@ pages["doctor"] = (
     + """</section>"""
     + cta(),
 )
-# Página de tratamientos y datos de las guías educativas.
-pages["tratamientos"] = (
-    "Tratamientos · Cirugía general y laparoscópica",
+# Página de servicios y datos de las guías educativas.
+pages["servicios"] = (
+    "Servicios · Cirugía general y laparoscópica",
     mast(
-        "TRATAMIENTOS",
+        "SERVICIOS",
         "Información para<br>decidir con claridad.",
         "Conoce las áreas de atención y conversa con el cirujano sobre las opciones para tu caso.",
     )
@@ -368,13 +389,13 @@ pages["tratamientos"] = (
 )
 data = {
     "vesicula": (
-        "VESÍCULA BILIAR",
-        "Cirugía de vesícula<br>por laparoscopia.",
-        "Información sobre la evaluación de cálculos biliares y la colecistectomía laparoscópica.",
+        "COLECISTECTOMÍA",
+        "Extracción de<br>la vesícula.",
+        "Servicio de colecistectomía por abordaje laparoscópico o abierto, según la evaluación médica.",
         "¿Qué se evalúa?",
         "Los cálculos biliares pueden asociarse a dolor y otras complicaciones. La indicación de tratamiento requiere revisar los síntomas, los estudios y los antecedentes.",
         "¿Cómo es el procedimiento?",
-        "La colecistectomía consiste en retirar la vesícula. El abordaje laparoscópico utiliza una cámara e instrumentos a través de pequeñas incisiones. El cirujano explicará si esta opción es adecuada para tu caso.",
+        "La colecistectomía consiste en retirar la vesícula. Puede realizarse por laparoscopia, mediante pequeñas incisiones, o por cirugía abierta. El cirujano explicará qué abordaje es adecuado para tu caso y cuándo podría ser necesario cambiar de técnica.",
         [
             (
                 "Antes de la cirugía",
@@ -391,9 +412,9 @@ data = {
         ],
     ),
     "hernias": (
-        "HERNIAS ABDOMINALES",
-        "Una evaluación.<br>Un plan para tu hernia.",
-        "Valoración de hernias inguinales, umbilicales e incisionales.",
+        "REPARACIÓN DE HERNIAS",
+        "Reparación de hernias<br>abdominales.",
+        "Evaluación para la reparación quirúrgica de hernias inguinales, umbilicales e incisionales.",
         "¿Qué es una hernia?",
         "Una hernia ocurre cuando tejido del interior del abdomen protruye por una zona débil de su pared. El tipo, el tamaño y los síntomas orientan la evaluación.",
         "¿Qué opciones se consideran?",
@@ -440,10 +461,12 @@ data = {
 for slug, (tag, title, desc, q1, a1, q2, a2, items) in data.items():
     pages[slug] = (
         tag.title() + " en Huancayo · Cirugía Integral",
-        '<div class="wrap breadcrumb"><a href="/tratamientos/">Tratamientos</a><span>/</span>'
+        mast(tag, title.replace('<br>', ' '), desc).replace(
+            'class="mast wrap"', 'class="mast wrap compact-mast service-detail-mast"'
+        )
+        + '<div class="wrap breadcrumb service-detail-breadcrumb"><a href="/servicios/">Servicios</a><span>/</span>'
         + tag.title()
         + "</div>"
-        + mast(tag, title, desc)
         + (
             f"""<section class="wrap treatment-grid">"""
             f"""<div class="article">"""
@@ -467,7 +490,6 @@ for slug, (tag, title, desc, q1, a1, q2, a2, items) in data.items():
         )
         + (
             "</div>"
-            '<div class="medical-note">Información orientativa. La evaluación médica determina el diagnóstico y el tratamiento. Este contenido debe ser revisado por el especialista antes de su publicación definitiva.</div>'
             "</div>"
             '<aside class="appointment-card">'
             '<span class="eyebrow">CONSULTA ESPECIALIZADA</span>'
@@ -480,22 +502,30 @@ for slug, (tag, title, desc, q1, a1, q2, a2, items) in data.items():
             "</section>"
             '<section class="section wrap">'
             '<span class="eyebrow">SIGUE EXPLORANDO</span>'
-            "<h2>Otros tratamientos.</h2>"
-            '<div class="service-grid">'
+            "<h2>Otros servicios.</h2>"
+            '<div class="services-carousel services-carousel--contextual" data-services-carousel>'
+            '<div class="services-grid service-grid service-grid--contextual">'
         )
-        + cards()
-        + """</div></section>""",
+        + cards(slug, include_pending=True)
+        + (
+            '</div>'
+            '<div class="services-carousel-controls" aria-label="Navegación de servicios">'
+            '<button type="button" class="carousel-button" data-carousel-prev aria-label="Servicio anterior">←</button>'
+            '<button type="button" class="carousel-button" data-carousel-next aria-label="Servicio siguiente">→</button>'
+            '</div>'
+            '</div></section>'
+        ),
     )
 # Guía del paciente.
 pages["guia-del-paciente"] = (
     "Guía del paciente · Preparación y consulta",
     mast(
         "GUÍA DEL PACIENTE",
-        "Más información.<br>Más tranquilidad.",
+        "Más información. Más tranquilidad.",
         "Una guía práctica para preparar tu consulta y conversar sobre tu atención.",
-    )
+    ).replace('class="mast wrap"', 'class="mast wrap compact-mast"')
     + (
-        '<section class="wrap guide-grid">'
+        '<section class="wrap guide-grid patient-guide-overview">'
         '<article class="guide-card">'
         '<span class="card-no">01 · PRIMERA CONSULTA</span>'
         "<h2>Qué llevar.</h2>"
@@ -544,7 +574,6 @@ pages["guia-del-paciente"] = (
         ]
     )
     + (
-        '<div class="medical-note">Esta guía no sustituye una evaluación médica. Ante una emergencia, acude a un servicio de urgencias.</div>'
         "</section>"
     )
     + cta(),
@@ -617,7 +646,7 @@ pages["contacto"] = (
 descriptions = {
     "": "Cirugía general y laparoscópica en Huancayo con el Dr. Hector Rodríguez Aquiño. Conoce las áreas de atención y prepara tu consulta.",
     "doctor": "Conoce al Dr. Hector Rodríguez Aquiño, cirujano general en Huancayo, y su enfoque de evaluación individual y atención laparoscópica.",
-    "tratamientos": "Información sobre cirugía de vesícula, hernias abdominales y laparoscopia en Huancayo. Conoce qué se evalúa y las opciones para tu caso.",
+    "servicios": "Información sobre cirugía de vesícula, hernias abdominales y laparoscopia en Huancayo. Conoce qué se evalúa y las opciones para tu caso.",
     "vesicula": "Conoce la evaluación de cálculos biliares y la cirugía de vesícula por laparoscopia en Huancayo: procedimiento, preparación y seguimiento.",
     "hernias": "Información sobre hernias inguinales, umbilicales e incisionales en Huancayo: evaluación, opciones de reparación y recuperación.",
     "laparoscopia": "Conoce en qué consiste la cirugía laparoscópica, cuándo puede considerarse y qué conversar con el cirujano en Huancayo.",
@@ -659,8 +688,8 @@ def page_metadata(slug, title):
                 {
                     "@type": "ListItem",
                     "position": 2,
-                    "name": "Tratamientos",
-                    "item": site_url + "tratamientos/",
+                    "name": "Servicios",
+                    "item": site_url + "servicios/",
                 }
             )
         crumbs.append(
@@ -705,12 +734,43 @@ def page_metadata(slug, title):
     )
 
 
+brand_symbol = (
+    '<span class="brand-mark brand-monogram" aria-hidden="true">'
+    '<svg viewBox="0 0 64 64" role="img">'
+    '<text class="brand-monogram-letter" x="32" y="53" text-anchor="middle">R</text>'
+    '<g class="brand-monogram-instrument">'
+    '<circle cx="8" cy="21" r="5.2"/>'
+    '<circle cx="8" cy="35" r="5.2"/>'
+    '<path d="M12 24l5 3M12 32l5-3"/>'
+    '<circle cx="19" cy="28" r="3.1"/>'
+    '<path d="M22 29l34 14M53 42l8-3M53 44l7 6"/>'
+    "</g>"
+    "</svg>"
+    "</span>"
+)
+
+# El favicon usa el mismo monograma R del encabezado para conservar la identidad
+# visual incluso en el reducido espacio de una pestaña del navegador.
+favicon_svg = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+    '<text x="32" y="53" text-anchor="middle" fill="#10283d" '
+    'font-family="Georgia,serif" font-size="58">R</text>'
+    '<g fill="none" stroke="#087e83" stroke-width="2.6" '
+    'stroke-linecap="round" stroke-linejoin="round">'
+    '<circle cx="8" cy="21" r="5.2"/><circle cx="8" cy="35" r="5.2"/>'
+    '<path d="M12 24l5 3M12 32l5-3"/><circle cx="19" cy="28" r="3.1"/>'
+    '<path d="M22 29l34 14M53 42l8-3M53 44l7 6"/>'
+    '</g></svg>'
+)
+favicon_data = quote(favicon_svg, safe="")
+
+
 for slug, (title, body) in pages.items():
     navigation = "".join(
         f'<a href="{url(s)}"'
         + (
             ' aria-current="page"'
-            if s == slug or s == "tratamientos" and slug in data
+            if s == slug or s == "servicios" and slug in data
             else ""
         )
         + f">{label}</a>"
@@ -724,9 +784,9 @@ for slug, (title, body) in pages.items():
         f"""<meta name="viewport" content="width=device-width, initial-scale=1">"""
         f"""<title>{title}</title>"""
         f"""<meta name="description" content="{html.escape(descriptions[slug],quote=True)}">"""
-        f"""<meta name="robots" content="{robots}">{page_metadata(slug,title)}<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2310283d'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='%237cdecf' stroke-width='4'/%3E%3C/svg%3E">"""
-        f"""<link rel="stylesheet" href="/style.css?v=20261015-services">"""
-        f"""<script defer src="/app.js">"""
+        f"""<meta name="robots" content="{robots}">{page_metadata(slug,title)}<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,{favicon_data}">"""
+        f"""<link rel="stylesheet" href="/style.css?v=20261015-side-arrows">"""
+        f"""<script defer src="/app.js?v=20261015-side-arrows">"""
         f"""</script>"""
         f"""</head>"""
         f"""<body>"""
@@ -734,7 +794,7 @@ for slug, (title, body) in pages.items():
         f"""<header>"""
         f"""<div class="wrap header-inner">"""
         f"""<a class="brand" href="/" aria-label="Cirugía Integral, inicio">"""
-        f"""<span class="brand-mark">+</span>"""
+        f"""{brand_symbol}"""
         f"""<span>Cirugía Integral<small>DR. HECTOR RODRÍGUEZ AQUIÑO</small>"""
         f"""</span>"""
         f"""</a>"""
@@ -748,7 +808,7 @@ for slug, (title, body) in pages.items():
         f"""<div class="wrap footer-grid">"""
         f"""<div>"""
         f"""<a class="brand" href="/">"""
-        f"""<span class="brand-mark">+</span>"""
+        f"""{brand_symbol}"""
         f"""<span>Cirugía Integral<small>CIRUGÍA GENERAL Y LAPAROSCÓPICA</small>"""
         f"""</span>"""
         f"""</a>"""
@@ -757,7 +817,7 @@ for slug, (title, body) in pages.items():
         f"""<div>"""
         f"""<h3>Explora</h3>"""
         f"""<a href="/doctor/">El doctor</a>"""
-        f"""<a href="/tratamientos/">Servicios</a>"""
+        f"""<a href="/servicios/">Servicios</a>"""
         f"""<a href="/guia-del-paciente/">Guía del paciente</a>"""
         f"""</div>"""
         f"""<div>"""
@@ -833,6 +893,20 @@ for slug, (title, body) in pages.items():
     target = root / slug if slug else root
     target.mkdir(parents=True, exist_ok=True)
     (target / "index.html").write_text(head, encoding="utf-8")
+# Compatibilidad con enlaces guardados antes de estandarizar la ruta Servicios.
+legacy_services = root / "tratamientos"
+legacy_services.mkdir(parents=True, exist_ok=True)
+(legacy_services / "index.html").write_text(
+    '<!doctype html><html lang="es"><head><meta charset="utf-8">'
+    '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    '<title>Servicios · Cirugía Integral</title>'
+    '<meta name="robots" content="noindex,follow">'
+    '<meta http-equiv="refresh" content="0;url=../servicios/">'
+    f'<link rel="canonical" href="{html.escape(site_url, quote=True)}servicios/">'
+    '</head><body><p>Ir a <a href="../servicios/">Servicios</a>.</p></body></html>',
+    encoding="utf-8",
+)
+
 # The wildcard group also permits search crawlers such as Googlebot, Bingbot
 # and OAI-SearchBot. Search access and AI training are separate policies.
 # 7. Archivos públicos auxiliares: robots.txt, sitemap y página 404.

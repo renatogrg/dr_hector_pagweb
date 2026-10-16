@@ -226,8 +226,8 @@ def adapt(pages, descriptions, mast, faq):
             .replace("Huancayo, Perú", "Ubicación de atención pendiente de confirmar")
         )
         body = body.replace("Mi enfoque comienza", "La evaluación comienza")
-        body = body.replace("Conocer el tratamiento", "Leer información").replace(
-            "Otros tratamientos.", "Más información educativa."
+        body = body.replace("Conocer el tratamiento", "Ver información completa").replace(
+            "Otros servicios.", "Servicios quirúrgicos."
         )
         body = body.replace(
             "Evaluación de cálculos biliares y opciones de tratamiento laparoscópico.",
@@ -236,7 +236,7 @@ def adapt(pages, descriptions, mast, faq):
             "Valoración de hernias inguinales, umbilicales e incisionales.",
             "Información educativa sobre hernias inguinales, umbilicales e incisionales.",
         )
-        body = body.replace("Áreas de atención", "Información educativa")
+        body = body.replace("Áreas de atención", "Servicios quirúrgicos")
         body = (
             re.sub(
                 r'<div class="credential-box">.*?</div><a class="button"',
@@ -283,7 +283,7 @@ def adapt(pages, descriptions, mast, faq):
         )
     hero_intro = (
         '<div class="hero-intro">'
-        '<span class="eyebrow hero-specialty">Cirugía general y laparoscópica</span>'
+        '<span class="eyebrow hero-specialty">CIRUGIA GENERAL Y LAPAROSCÓPICA</span>'
         '<div class="hero-locations">'
         '<ul aria-label="Lugares de atención">'
         "<li>Huancayo</li>"
@@ -300,41 +300,64 @@ def adapt(pages, descriptions, mast, faq):
             '<span class="eyebrow">CIRUGÍA GENERAL</span>', hero_intro
         ),
     )
-    pages["tratamientos"] = (
+    # Un solo carrusel compartido mantiene Inicio y Servicios sincronizados.
+    service_carousel = (
+            '<div class="services-carousel" data-services-carousel>'
+            '<div class="services-grid">'
+            '<a class="service-option service-option--featured" href="/laparoscopia/">'
+            '<span class="service-status">Servicio quirúrgico</span>'
+            "<h2>Cirugía laparoscópica</h2>"
+            "<p>Comprende este abordaje de mínima invasión y cuándo podría ser una opción.</p>"
+            '<span class="text-link">Ver información completa</span>'
+            "</a>"
+            '<a class="service-option" href="/vesicula/">'
+            '<span class="service-status">Servicio quirúrgico</span>'
+            "<h2>Colecistectomía</h2>"
+            "<p>Extracción de la vesícula por laparoscopia o cirugía abierta, según la evaluación médica.</p>"
+            '<span class="text-link">Ver información completa</span>'
+            "</a>"
+            '<a class="service-option" href="/hernias/">'
+            '<span class="service-status">Servicio quirúrgico</span>'
+            "<h2>Reparación de hernias abdominales</h2>"
+            "<p>Reparación por laparoscopia o cirugía abierta, con el abordaje indicado para cada caso.</p>"
+            '<span class="text-link">Ver información completa</span>'
+            "</a>"
+            '<article class="service-option service-option--placeholder">'
+            '<span class="service-status">Pendiente de confirmar</span>'
+            "<h2>Servicio adicional 04</h2>"
+            "<p>El nombre y los detalles de este servicio se incorporarán al confirmar la información del doctor.</p>"
+            '<span class="text-link service-link-disabled">Próximamente</span>'
+            "</article>"
+            '<article class="service-option service-option--placeholder">'
+            '<span class="service-status">Pendiente de confirmar</span>'
+            "<h2>Servicio adicional 05</h2>"
+            "<p>El nombre y los detalles de este servicio se incorporarán al confirmar la información del doctor.</p>"
+            '<span class="text-link service-link-disabled">Próximamente</span>'
+            "</article>"
+            "</div>"
+            '<div class="services-carousel-controls" aria-label="Navegación de servicios">'
+            '<button type="button" class="carousel-button" data-carousel-prev aria-label="Servicio anterior">←</button>'
+            '<button type="button" class="carousel-button" data-carousel-next aria-label="Servicio siguiente">→</button>'
+            "</div>"
+            "</div>"
+    )
+    pages["servicios"] = (
         "Servicios de cirugía general y laparoscopia",
         mast(
             "SERVICIOS",
             "Atención quirúrgica con información clara.",
-            "Conoce la especialidad del doctor y consulta las guías educativas antes de conversar sobre tu caso.",
-        )
+            "Conoce los servicios quirúrgicos y prepara tus preguntas antes de conversar sobre tu caso.",
+        ).replace('class="mast wrap"', 'class="mast wrap compact-mast"')
         + (
             '<section class="wrap services-overview">'
             '<div class="services-heading">'
             '<span class="eyebrow">ÁREAS DE ATENCIÓN</span>'
             "<h2>Información para decidir con claridad.</h2>"
-            "<p>La cirugía general y laparoscópica requiere una evaluación individual. Estas opciones te ayudan a conocer el enfoque del doctor y a preparar tus preguntas para la consulta.</p>"
+            "<p>La cirugía general y laparoscópica requiere una evaluación individual. Conoce los procedimientos y prepara tus preguntas para la consulta.</p>"
             "</div>"
-            '<div class="services-grid">'
-            '<article class="service-option service-option--featured">'
-            '<span class="service-status">Servicio confirmado</span>'
-            "<h2>Cirugía laparoscópica</h2>"
-            "<p>Conoce este abordaje quirúrgico, sus posibles beneficios y los aspectos que se evalúan antes de indicar un procedimiento.</p>"
-            '<a class="text-link" href="/laparoscopia/">Conocer la laparoscopia</a>'
-            "</article>"
-            '<article class="service-option">'
-            '<span class="service-status">Guía educativa</span>'
-            "<h2>Vesícula biliar</h2>"
-            "<p>Información general sobre cálculos biliares, señales de alerta y preguntas útiles para una evaluación médica.</p>"
-            '<a class="text-link" href="/vesicula/">Leer guía sobre vesícula</a>'
-            "</article>"
-            '<article class="service-option">'
-            '<span class="service-status">Guía educativa</span>'
-            "<h2>Hernias abdominales</h2>"
-            "<p>Una explicación sencilla sobre los tipos de hernia, la evaluación y las situaciones que requieren atención pronta.</p>"
-            '<a class="text-link" href="/hernias/">Leer guía sobre hernias</a>'
-            "</article>"
-            "</div>"
-            '<p class="services-note">Las guías son material educativo y no confirman la disponibilidad de un procedimiento. La evaluación médica determina las opciones adecuadas para cada caso.</p>'
+        )
+        + service_carousel
+        + (
             "</section>"
             '<section class="wrap services-cta">'
             "<div>"
@@ -344,6 +367,16 @@ def adapt(pages, descriptions, mast, faq):
             "</div>"
             '<a class="button light" href="/contacto/">Solicitar una consulta</a>'
             "</section>"
+        ),
+    )
+    pages[""] = (
+        pages[""][0],
+        re.sub(
+            r'<div class="service-grid">.*?</div>',
+            lambda match: service_carousel,
+            pages[""][1],
+            count=1,
+            flags=re.S,
         ),
     )
     pages["contacto"] = (
@@ -418,8 +451,8 @@ def adapt(pages, descriptions, mast, faq):
             "PREGUNTAS FRECUENTES",
             "Respuestas para preparar tu consulta.",
             "Información general sobre evaluación, laparoscopia y decisiones médicas.",
-        )
-        + '<section class="wrap narrow section">'
+        ).replace('class="mast wrap"', 'class="mast wrap compact-mast"')
+        + '<section class="wrap questions-list" aria-label="Preguntas y respuestas">'
         + "".join(
             (f"<article>" f"<h2>{e(q)}</h2>" f"<p>{e(a)}</p>" f"</article>")
             for q, a in questions
@@ -456,44 +489,12 @@ def adapt(pages, descriptions, mast, faq):
                 "vesicula": "Guía educativa sobre cirugía de vesícula",
                 "hernias": "Guía educativa sobre hernias abdominales",
             }[slug]
-            body = (
-                '<div class="wrap medical-note">Información educativa. Este procedimiento no se anuncia como un servicio confirmado del doctor.</div>'
-                + body
-            )
-        body += (
-            '<section class="wrap narrow section">'
-            + editorial_block(sources[slug])
-            + "</section>"
-        )
         pages[slug] = (title, body)
-    pages["articulos"] = (
-        "Artículos educativos sobre cirugía",
-        mast(
-            "ARTÍCULOS EDUCATIVOS",
-            "Comprender antes de decidir.",
-            "Guías generales con fuentes institucionales. La revisión médica de los borradores está pendiente.",
-        )
-        + '<section class="wrap section"><div class="service-grid">'
-        + "".join(
-            (
-                f'<a class="service-card" href="/{s}/">'
-                f"<h2>{e(pages[s][0])}</h2>"
-                f"<p>Definición, evaluación, preparación y recuperación.</p>"
-                f'<span class="text-link">Leer guía</span>'
-                f"</a>"
-            )
-            for s in sources
-        )
-        + "</div></section>",
-    )
-    descriptions["articulos"] = (
-        "Guías educativas sobre vesícula, hernias y laparoscopia, con fuentes institucionales y estado explícito de revisión médica."
-    )
     descriptions["contacto"] = (
         "Consulta los canales de atención verificados del Dr. Héctor Rodríguez Aquiño y cómo solicitar disponibilidad."
     )
-    descriptions["tratamientos"] = (
-        "Cirugía general y laparoscopia: evaluación individual y guías educativas sobre procedimientos quirúrgicos."
+    descriptions["servicios"] = (
+        "Servicios de cirugía general y laparoscópica: colecistectomía, reparación de hernias y abordajes de mínima invasión."
     )
     # Local identity appears only with a supplied verified locality.
     if clinic["city"]:

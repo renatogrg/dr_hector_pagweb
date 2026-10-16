@@ -20,7 +20,7 @@ for (const file of files) {
     if (!existsSync(target)) failures.push(`${file}: enlace sin destino ${link}`);
   }
 }
-if (files.length !== 10) failures.push(`Se esperaban 10 páginas, se encontraron ${files.length}`);
+if (files.length !== 10) failures.push(`Se esperaban 9 páginas y una redirección, se encontraron ${files.length} archivos`);
 if (failures.length) { console.error(failures.join('\n')); process.exitCode = 1; }
-else console.log(`${files.length} páginas y ${count} enlaces/recursos locales verificados. Compatibles con rutas de GitHub Pages.`);
+else console.log(`9 páginas, una redirección y ${count} enlaces/recursos locales verificados. Compatibles con rutas de GitHub Pages.`);
 execFileSync('python', [fileURLToPath(new URL('./check-seo.py', import.meta.url))], { stdio: 'inherit' });

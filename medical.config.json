@@ -19,7 +19,7 @@
     "mapsUrl": null,
     "hours": []
   },
-  "confirmedServices": ["laparoscopia"],
+  "confirmedServices": ["laparoscopia", "vesicula", "hernias"],
   "editorial": {
     "author": "Redacción del sitio",
     "published": "2026-10-08",
