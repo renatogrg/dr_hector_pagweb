@@ -182,3 +182,51 @@
     margin-top: 25px;
   }
 }
+
+/* Official logo supplied by the owner. */
+.brand--logo {
+  gap: 0;
+}
+.brand-logo-frame {
+  display: block;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+.brand-logo {
+  max-width: none;
+  height: auto;
+}
+.brand-logo-frame--header {
+  width: 200px;
+  height: 104px;
+}
+.brand-logo-frame--header .brand-logo {
+  width: 240px;
+  transform: translate(-20px, -29px);
+}
+.brand-logo-frame--footer {
+  width: 280px;
+  height: 146px;
+}
+.brand-logo-frame--footer .brand-logo {
+  width: 336px;
+  transform: translate(-28px, -41px);
+}
+@media (max-width: 760px) {
+  .brand-logo-frame--header {
+    width: 150px;
+    height: 78px;
+  }
+  .brand-logo-frame--header .brand-logo {
+    width: 180px;
+    transform: translate(-15px, -22px);
+  }
+  .brand-logo-frame--footer {
+    width: 230px;
+    height: 120px;
+  }
+  .brand-logo-frame--footer .brand-logo {
+    width: 276px;
+    transform: translate(-23px, -34px);
+  }
+}
