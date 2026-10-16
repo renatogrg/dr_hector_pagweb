@@ -343,7 +343,8 @@ def adapt(pages, descriptions, mast, faq):
     )
     pages["servicios"] = (
         "Servicios de cirugía general y laparoscopia",
-        mast(
+        '<div class="page-entry">'
+        + mast(
             "SERVICIOS",
             "Atención quirúrgica con información clara.",
             "Conoce los servicios quirúrgicos y prepara tus preguntas antes de conversar sobre tu caso.",
@@ -358,7 +359,8 @@ def adapt(pages, descriptions, mast, faq):
         )
         + service_carousel
         + (
-            "</section>"
+            "</section></div>"
+            '<div class="service-consultation-section">'
             '<section class="wrap services-cta">'
             "<div>"
             '<span class="eyebrow">CONSULTA ESPECIALIZADA</span>'
@@ -366,7 +368,7 @@ def adapt(pages, descriptions, mast, faq):
             "<p>Conversa sobre tus síntomas, estudios previos y las alternativas que podrían corresponder a tu caso.</p>"
             "</div>"
             '<a class="button light" href="/contacto/">Solicitar una consulta</a>'
-            "</section>"
+            "</section></div>"
         ),
     )
     pages[""] = (

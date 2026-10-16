@@ -49,6 +49,53 @@
 @media(max-width:760px){.desktop-navigation{display:none}.mobile-navigation{display:block;margin-left:auto}.mobile-navigation summary{cursor:pointer;list-style:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px}.mobile-navigation summary::-webkit-details-marker{display:none}.mobile-navigation nav{position:absolute;top:79px;left:0;right:0;display:flex;flex-direction:column;padding:20px;background:white;box-shadow:0 15px 20px #10283d0a}.mobile-navigation:not([open]) nav{display:none}}
 
 /* Services page */
+.page-entry {
+  padding-bottom: 40px;
+}
+.page-entry .services-overview {
+  padding-bottom: 0;
+}
+.service-consultation-section {
+  padding: 40px 0;
+  background: #eaf3f6;
+}
+.service-consultation-section .services-cta {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.patient-guide-faq {
+  padding: 48px 0;
+  background: #eaf3f6;
+  border-top: 1px solid var(--line);
+}
+.page-entry.patient-guide-entry {
+  min-height: 0;
+  padding-bottom: 32px;
+}
+.patient-guide-entry .consultation-banner {
+  margin-top: 24px;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+.patient-guide-entry .consultation-banner-inner {
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+@media (min-width: 821px) {
+  .page-entry {
+    min-height: calc(100svh - 89px);
+  }
+}
+@media (max-width: 760px) {
+  .page-entry {
+    padding-bottom: 32px;
+  }
+  .patient-guide-faq,
+  .service-consultation-section {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+}
 .consultation-banner {
   background: linear-gradient(110deg, #0c2639, #124e60);
   color: white;

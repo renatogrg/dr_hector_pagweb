@@ -519,7 +519,8 @@ for slug, (tag, title, desc, q1, a1, q2, a2, items) in data.items():
 # Guía del paciente.
 pages["guia-del-paciente"] = (
     "Guía del paciente · Preparación y consulta",
-    mast(
+    '<div class="page-entry patient-guide-entry">'
+    + mast(
         "GUÍA DEL PACIENTE",
         "Más información. Más tranquilidad.",
         "Una guía práctica para preparar tu consulta y conversar sobre tu atención.",
@@ -549,7 +550,11 @@ pages["guia-del-paciente"] = (
         "</ul>"
         "</article>"
         "</section>"
-        '<section class="section wrap narrow">'
+    )
+    + cta()
+    + (
+        '</div><section class="patient-guide-faq">'
+        '<div class="wrap narrow">'
         '<span class="eyebrow">DUDAS HABITUALES</span>'
         "<h2>Tu atención, paso a paso.</h2>"
     )
@@ -573,10 +578,7 @@ pages["guia-del-paciente"] = (
             ),
         ]
     )
-    + (
-        "</section>"
-    )
-    + cta(),
+    + "</div></section>",
 )
 # Contacto base; site_features.py adapta los canales a la configuración real.
 pages["contacto"] = (
