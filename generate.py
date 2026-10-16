@@ -725,7 +725,7 @@ for slug, (title, body) in pages.items():
         f"""<title>{title}</title>"""
         f"""<meta name="description" content="{html.escape(descriptions[slug],quote=True)}">"""
         f"""<meta name="robots" content="{robots}">{page_metadata(slug,title)}<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2310283d'/%3E%3Cpath d='M20 10v20M10 20h20' stroke='%237cdecf' stroke-width='4'/%3E%3C/svg%3E">"""
-        f"""<link rel="stylesheet" href="/style.css">"""
+        f"""<link rel="stylesheet" href="/style.css?v=20261015-services">"""
         f"""<script defer src="/app.js">"""
         f"""</script>"""
         f"""</head>"""
